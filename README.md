@@ -4,14 +4,14 @@ Scrappy DDNS is Dynamic DNS-like service that sends push notifications to your m
 # Why Scrappy?
 So what good is a DDNS service that doesn't actually update DNS records? Scrappy might be right for you if:
 
-* Your preferred DNS hosting service doesn't support true Dynamic DNS and your IP address rarely changes.
+* Your DNS hosting service doesn't support true Dynamic DNS and your IP address rarely changes.
 * You prefer to manage DNS records manually.
 * You just want to know whenever your IP address changes.
 
 Scrappy is free software that you can install behind your firewall or on a hosted web server or VPS. The latter option is particularly useful when you want to monitor multiple networks or servers at the same time. You can assign friendly names to each one that will show up in the alerts.
 
 # How it works
-Scrappy DDNS is a simple Python web service. It listens for HTTP GET requests with a special token in the URL path that matches network or server that it knows about. For example:
+Scrappy DDNS is a simple Python web service. It listens for HTTP GET requests with a special token in the URL path that matches a network or server that it knows about. For example:
 ```
 https://scrappy.example.com/NRmP324IsdSo2xidk69imtR2
 ```
@@ -21,7 +21,7 @@ Alternatively, the public IP address can be given as a URL parameter:
 ```
 https://scrappy.example.com/NRmP324IsdSo2xidk69imtR2?ip_address=1.2.3.4
 ```
-This is necessary when source IP of the HTTP request is not the same as the public IP such as when Scrappy is installed behind the firewall.
+This is necessary if the source IP address of the HTTP request is not the same as the public IP such as when Scrappy is installed behind the firewall.
 
 # Getting started
 Before you begin, download the free [Notify My Android](http://www.notifymyandroid.com/) app and obtain an API key by registering on their web site. The service has a free tier that should suffice if you don't use it for anything else.
@@ -39,7 +39,7 @@ VVko3dcRTdLbNFvvi35J3PqB:Main Street office
 ```
 The Git repo has a sample `token.list` file that you can use as a template.
 
-Once you have your API key and have created a list of tokens, you're about ready to deploy.
+Once you have your API key and have created a list of tokens, you're ready to deploy.
 
 # Deployment
 There are several ways to get the Scrappy DDNS up and running. From simple to complex, your options are:
@@ -48,15 +48,15 @@ There are several ways to get the Scrappy DDNS up and running. From simple to co
 2. Run it inside a [Docker container](https://github.com/rhasselbaum/docker-scrappy-ddns).
 3. Deploy it to an existing web server.
 
-We'll cover each option next.
+We'll cover each option below.
 
 ## Option 1: Run as a Python script
 
 The simplest option is to run the Scrappy DDNS script (`scrappy-ddns.py`) from the command line. This is the least secure option and should be chosen only if you will run the service behind your firewall and you trust the people on your local network. SSL/TLS is not supported in this configuration so tokens will be sent unencrypted over the network.
 
-> Don't not choose this option if the service will be exposed on the Internet!
+> Do NOT choose this option if the service will be exposed on the Internet!
 
-Scary disclaimers aside, this may be a good option for home networks.
+Scary disclaimers aside, this may be a good choice for home networks.
 
 The script depends on **Python 3.2 or higher** and the **Flask** web microframework, so make sure those are installed. Next, clone the Git repo or download and extract the ZIP to a suitable directory that also contains your `token.list` file.
 
@@ -82,7 +82,7 @@ The recommended way to run a standalone instance of Scrappy is as a [Docker](htt
 
 ## Option 3: Deploy to an existing web server
 
-Scrappy DDNS is a Flask web application that can be deployed to any WSGI-compliant container including Apache, nginx, Twisted Web, Tornado, and others. You must have the **Flask** library installed and **Python 3.2 or higher** to run it. The Flask project's [deployment documentation](http://flask.pocoo.org/docs/0.10/deploying/) explains how to deploy to a number of these servers. If you have an existing web server and you're the DIY type, this might be a good option for you. Just make sure your server supports SSL/TLS if it is exposed on the Internet to protect tokens in transit.
+Scrappy DDNS is a Flask web application that can be deployed to any WSGI-compliant container including Apache, nginx, Twisted Web, Tornado, and others. You must have the **Flask** library installed and **Python 3.2 or higher** to run it. The Flask project's [deployment documentation](http://flask.pocoo.org/docs/0.10/deploying/) explains how to deploy to a number of these servers. If you have an existing web server and you're the DIY type, this might be a good option for you. Just make sure your server supports SSL/TLS to protect tokens in transit if it is exposed on the Internet.
 
 # Client configuration
 

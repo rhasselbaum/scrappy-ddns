@@ -53,7 +53,8 @@ def push_notify(client_name, client_ip):
 
     # Make the request.
     try:
-        with urllib.request.urlopen(req, post_data) as resp:
+        ca_file = os.path.join(os.path.dirname(__file__), 'nma-ca.pem')
+        with urllib.request.urlopen(req, post_data, cafile=ca_file) as resp:
             # Valid response is an XML document. Let's parse it.
             resp_tree = xml.etree.ElementTree.parse(resp)
             root_elem = resp_tree.getroot()

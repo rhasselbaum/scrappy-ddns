@@ -21,7 +21,7 @@ Alternatively, the public IP address can be given as a URL parameter:
 ```
 https://scrappy.example.com/NRmP324IsdSo2xidk69imtR2?ip_address=1.2.3.4
 ```
-This is necessary if the source IP address of the HTTP request is not the same as the public IP such as when Scrappy is installed behind the firewall.
+This is necessary if the source IP address of the HTTP request is not the same as the public IP such as when Scrappy is installed behind the firewall. Naturally, this requires the client to [know](http://tecadmin.net/5-commands-to-get-public-ip-using-linux-terminal/) its public IP address. :-)
 
 # Getting started
 Before you begin, download the free [Notify My Android](http://www.notifymyandroid.com/) app and obtain an API key by registering on their web site. The service has a free tier that should suffice if you don't use it for anything else.

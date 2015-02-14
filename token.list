@@ -1,0 +1,17 @@
+# This file lists valid tokens for servers/networks you want to monitor for 
+# public IP address changes. Each line has the form:
+#
+# <token>:<name>
+#
+# where <token> is an alphanumeric string and `<name>` is a friendly name to 
+# appear in alerts. Tokens are like passwords. They should be secret and hard
+# to guess. The following web site generates nice long random alphanumeric 
+# strings that make perfect tokens: https://www.grc.com/passwords.htm
+#
+# EXAMPLES
+#
+# My home network
+# NRmP324IsdSo2xidk69imtR2:Home network
+# Branch office (VPN)
+# VVko3dcRTdLbNFvvi35J3PqB:Main Street office
+

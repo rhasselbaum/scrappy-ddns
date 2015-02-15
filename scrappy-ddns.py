@@ -5,11 +5,11 @@ import time
 import re
 import sys
 import urllib.parse
-import urllib.request
-import urllib.error
-import xml.etree.ElementTree
+import json
 import traceback
 import tempfile
+import http.client
+import ssl
 
 # Create app. Look for config file in module dir or dir in environment variable.
 app = Flask(__name__)
@@ -38,49 +38,68 @@ def update_ip(ip_filename, client_name, client_ip):
     os.rename(tmp_filename, ip_filename)
 
 
+def create_secure_conn():
+    """Create and return HTTPSConnection to the push service."""
+    context = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
+    context.verify_mode = ssl.CERT_REQUIRED
+    ca_file = os.path.join(os.path.dirname(__file__), 'pushover-ca.pem')
+    context.load_verify_locations(ca_file)
+    return http.client.HTTPSConnection('api.pushover.net', 443, context=context)
+
+
 def push_notify(client_name, client_ip):
     """Make the push notification request.
 
     Raises exception if push fails."""
+    # Make sure we have the required keys.
+    user_key = app.config.get('PUSHOVER_USER_KEY')
+    if not user_key:
+        raise ScrappyException('No Pushover user key given. Set PUSHOVER_USER_KEY in the config file.')
+    app_key = app.config.get('PUSHOVER_APP_KEY')
+    if not app_key:
+        raise ScrappyException('No Pushover application key given. Set PUSHOVER_APP_KEY in the config file.')
+
     # Assemble the request data
-    api_key = app.config.get('ANDROID_PUSH_API_KEY')
-    if not api_key:
-        raise ScrappyException('No push notification API key given.')
     notification = '{0} is at {1}'.format(client_name, client_ip)
-    post_attribs = dict(apikey=api_key,
-                        application='Scrappy DDNS',
-                        event='IP address update',
-                        description=notification)
+    post_attribs = dict(token=app_key,
+                        user=user_key,
+                        priority=app.config.get('PUSHOVER_MSG_PRIORITY', 0),
+                        title='IP address update',
+                        message=notification)
     post_data = urllib.parse.urlencode(post_attribs).encode('utf-8')
-    req = urllib.request.Request('https://www.notifymyandroid.com/publicapi/notify')
-    req.add_header('Content-Type', 'application/x-www-form-urlencoded;charset=utf-8')
+    headers = {'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'}
 
     # Make the request.
+    conn = None
     try:
-        ca_file = os.path.join(os.path.dirname(__file__), 'nma-ca.pem')
-        with urllib.request.urlopen(req, post_data, cafile=ca_file) as resp:
-            # Valid response is an XML document. Let's parse it.
-            resp_tree = xml.etree.ElementTree.parse(resp)
-            root_elem = resp_tree.getroot()
-            xml_dump = xml.etree.ElementTree.tostring(root_elem, encoding='unicode')
-            app.logger.debug('Web service response: %s', xml_dump)
-            # We expect either a <success> or <error> element under the root
-            if root_elem.find('success') is not None:
+        conn = create_secure_conn()
+        # Make the request, get the response.
+        conn.request('POST', '/1/messages.json', body=post_data, headers=headers)
+        resp = conn.getresponse()
+        resp_body = resp.read().decode('utf-8')
+        app.logger.debug('Web service response: %s', resp_body)
+        if resp.status == http.client.OK or resp.status in range(400, 500):
+            # Expecting a JSON body with a 'status' element.
+            resp_dict = json.loads(resp_body)
+            if resp.status == http.client.OK and resp_dict.get('status') == 1:
                 # We're good!
                 app.logger.info('Push succeeded: %s', notification)
             else:
-                # Something went wrong. Expected error format: <error code="xxx">message</error>
-                error_elem = root_elem.find('error')
-                if error_elem is not None and error_elem.attrib.get('code'):
-                    # Correctly formatted error.
-                    error_msg = error_elem.text if error_elem.text else '(no message)'
-                    raise ScrappyException('Push failed with error {0}: {1}'
-                                           .format(error_elem.attrib['code'], error_msg))
-                else:
-                    # We couldn't parse the error data. Just dump the XML to the logger.
-                    raise ScrappyException('Push failed with unrecognized error: {0}'.format(xml_dump))
-    except urllib.error.URLError as e:
-        raise ScrappyException('Push failed with: {0}'.format(e))
+                # Something went wrong. Look for an 'errors' array with details.
+                resp_errors = resp_dict.get('errors')
+                raise ScrappyException('Push failed with error {0}: {1}'
+                                       .format(resp.status, resp_errors if resp_errors else resp_dict))
+        else:
+            # Server-side error 500, most likely.
+            raise ScrappyException('Push failed with HTTP status: {0}'.format(resp.status))
+    except ScrappyException:
+        raise
+    except:
+        # A general connectivity failure or unexpected response format.
+        raise ScrappyException('Push failed with: {0}'.format(sys.exc_info()[1]))
+    finally:
+        if conn:
+            conn.close()
 
 
 def load_tokens(token_list_filename):

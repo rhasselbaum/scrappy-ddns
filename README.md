@@ -1,5 +1,5 @@
 # Scrappy DDNS
-Scrappy DDNS is Dynamic DNS-like service that sends push notifications to your mobile devices whenever your public IP address changes. It works in conjunction with DDNS clients built into many routers/firewalls such as [DD-WRT](http://www.dd-wrt.com/site/index) and [pfSense](https://www.pfsense.org/). But really, any client capable of making an HTTP request can work -- even a cron job that calls `curl` periodically will do in a pinch. Push notifications are sent via the awesome and mostly free [Notify My Android](http://www.notifymyandroid.com/) service. Sorry, there is no iOS support at this time.
+Scrappy DDNS is Dynamic DNS-like service that sends push notifications to your mobile devices whenever your public IP address changes. It works in conjunction with DDNS clients built into many routers/firewalls such as [DD-WRT](http://www.dd-wrt.com/site/index) and [pfSense](https://www.pfsense.org/). But really, any client capable of making an HTTP request can work -- even a cron job that calls `curl` periodically will do in a pinch. Push notifications are sent via the awesome [Pushover](https://pushover.net/) service, which supports Android, iOS, and desktop systems.
 
 # Why Scrappy?
 So what good is a DDNS service that doesn't actually update DNS records? Scrappy might be right for you if:
@@ -24,7 +24,7 @@ https://scrappy.example.com/NRmP324IsdSo2xidk69imtR2?ip_address=1.2.3.4
 This is necessary if the source IP address of the HTTP request is not the same as the public IP such as when Scrappy is installed behind the firewall. Naturally, this requires the client to [know](http://tecadmin.net/5-commands-to-get-public-ip-using-linux-terminal/) its public IP address. :-)
 
 # Getting started
-Before you begin, download the free [Notify My Android](http://www.notifymyandroid.com/) app and obtain an API key by registering on their web site. The service has a free tier that should suffice if you don't use it for anything else.
+Before you begin, download the [Pushover](https://pushover.net) app and register on their web site to obtain a user key and an [application key](https://pushover.net/apps/build) for your copy of Scrappy DDNS. The service has a free trial period and no recurring fees after purchase of an app license.
 
 Next, you need to create a token file called `token.list`. This is a text file that contains one line for each network or server you want to monitor. Each line must be of the form:
 ```
@@ -39,10 +39,8 @@ VVko3dcRTdLbNFvvi35J3PqB:Main Street office
 ```
 The Git repo has a sample `token.list` file that you can use as a template.
 
-Once you have your API key and have created a list of tokens, you're ready to deploy.
-
 # Deployment
-There are several ways to get the Scrappy DDNS up and running. From simple to complex, your options are:
+There are several ways to get the Scrappy DDNS up and running. From simple to complex, you can:
 
 1. Run the Python script directly.
 2. Run it inside a [Docker container](https://github.com/rhasselbaum/docker-scrappy-ddns).
@@ -60,7 +58,7 @@ Scary disclaimers aside, this may be a good choice for home networks.
 
 The script depends on **Python 3.2 or higher** and the **Flask** web microframework, so make sure those are installed. Next, clone the Git repo or download and extract the ZIP to a suitable directory that also contains your `token.list` file.
 
-Modify the `scrappy-ddns.conf` file to include your API key for push notifications. Change other settings there as you wish. Note that the script needs read/write access to a directory that it can use to store the most recent IP addresses it has learned for each token. By default, the current directory will be used for this, but you can specify a different one in the `scrappy-ddns.conf` file if you like.
+Modify the `scrappy-ddns.conf` file to include your user and application keys for Pushover notifications. Change other settings there as you wish. Note that the script needs read/write access to a directory that it can use to store the most recent IP addresses it has learned for each token. By default, the current directory will be used for this, but you can specify a different one in the `scrappy-ddns.conf` file.
 
 Finally, change directory to the location of the `scrappy-ddns.conf` and `token.list` files and start the service with a command like:
 ```

@@ -9,6 +9,7 @@ import urllib.request
 import urllib.error
 import xml.etree.ElementTree
 import traceback
+import tempfile
 
 # Create app. Look for config file in module dir or dir in environment variable.
 app = Flask(__name__)
@@ -30,8 +31,11 @@ def update_ip(ip_filename, client_name, client_ip):
     """Save the IP address in the given file and send a notification."""
     # Do the push first so if there is any error, we'll try again next time.
     push_notify(client_name, client_ip)
-    with open(ip_filename, 'w') as ip_file:
-        ip_file.write(client_ip)
+    # Update the IP file atomically, since others could be accessing it.
+    with tempfile.NamedTemporaryFile('w', dir=os.path.dirname(ip_filename), delete=False) as tmp_file:
+        tmp_file.write(client_ip)
+        tmp_filename = tmp_file.name
+    os.rename(tmp_filename, ip_filename)
 
 
 def push_notify(client_name, client_ip):

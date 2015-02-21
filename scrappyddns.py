@@ -13,9 +13,9 @@ import ssl
 
 # Create app. Look for config file in module dir or dir in environment variable.
 app = Flask(__name__)
-app.config.from_pyfile('scrappy-ddns.conf')
-if os.environ.get('SCRAPPY_DDNS_CONF'):
-    app.config.from_envvar('SCRAPPY_DDNS_CONF')
+app.config.from_pyfile('scrappyddns.conf')
+if os.environ.get('SCRAPPYDDNS_CONF'):
+    app.config.from_envvar('SCRAPPYDDNS_CONF')
 
 
 class ScrappyException(Exception):

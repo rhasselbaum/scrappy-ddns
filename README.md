@@ -52,7 +52,7 @@ We'll cover each option below.
 
 ## Option 1: Run as a Python script
 
-The simplest option is to run the Scrappy DDNS script (`scrappy-ddns.py`) from the command line. This is the least secure option and should be chosen only if you will run the service behind your firewall and you trust the people on your local network. SSL/TLS is not supported in this configuration so tokens will be sent unencrypted over the network.
+The simplest option is to run the Scrappy DDNS script (`scrappyddns.py`) from the command line. This is the least secure option and should be chosen only if you will run the service behind your firewall and you trust the people on your local network. SSL/TLS is not supported in this configuration so tokens will be sent unencrypted over the network.
 
 > Do NOT choose this option if the service will be exposed on the Internet!
 
@@ -60,21 +60,21 @@ Scary disclaimers aside, this may be a good choice for home networks.
 
 The script depends on **Python 3.4 or higher** and the **Flask** web microframework, so make sure those are installed. Next, clone the Git repo or download and extract the ZIP to a suitable directory that also contains your `token.list` file.
 
-Modify the `scrappy-ddns.conf` file to include your user and application keys for Pushover notifications. Change other settings there as you wish. Note that the script needs read/write access to a directory that it can use to store the most recent IP addresses it has learned for each token. By default, the current directory will be used for this, but you can specify a different one in the `scrappy-ddns.conf` file.
+Modify the `scrappyddns.conf` file to include your user and application keys for Pushover notifications. Change other settings there as you wish. Note that the script needs read/write access to a directory that it can use to store the most recent IP addresses it has learned for each token. By default, the current directory will be used for this, but you can specify a different one in the `scrappyddns.conf` file.
 
-Finally, change directory to the location of the `scrappy-ddns.conf` and `token.list` files and start the service with a command like:
+Finally, change directory to the location of the `scrappyddns.conf` and `token.list` files and start the service with a command like:
 ```
-python3 scrappy-ddns.py
+python3 scrappyddns.py
 ```
 This starts the service listening on port 5000. By default, the service accepts traffic on all network interfaces (bind address `0.0.0.0`). To bind to a particular interface and port instead, pass them as arguments:
 ```
-python3 scrappy-ddns.py [<bind_address>] [<port>]
+python3 scrappyddns.py [<bind_address>] [<port>]
 ```
 For example, to listen only for local connections on port 6000, you'd use:
 ```
-python3 scrappy-ddns.py localhost 6000
+python3 scrappyddns.py localhost 6000
 ```
-The script can be started from an init system such as systemd to run as a persistent service. And the locations of log files, the IP address cache, and the `scrappy-ddns.conf` file can be configured to make Scrappy fit well within a standard Linux file system hierarchy. However, if you are serious about running the service in a robust and secure way, I strongly encourage you to choose one of the other deployment options instead. That brings us to...
+The script can be started from an init system such as systemd to run as a persistent service. And the locations of log files, the IP address cache, and the `scrappyddns.conf` file can be configured to make Scrappy fit well within a standard Linux file system hierarchy. However, if you are serious about running the service in a robust and secure way, I strongly encourage you to choose one of the other deployment options instead. That brings us to...
 
 ## Option 2: Run inside a Docker container
 

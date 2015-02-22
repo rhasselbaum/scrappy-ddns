@@ -49,18 +49,18 @@ def push_notify(client_name, client_ip):
 
     Raises exception if push fails."""
     # Make sure we have the required keys.
-    user_key = app.config.get('PUSHOVER_USER_KEY')
+    user_key = app.config.get('PUSH_USER_KEY')
     if not user_key:
-        raise ScrappyException('No Pushover user key given. Set PUSHOVER_USER_KEY in the config file.')
-    app_key = app.config.get('PUSHOVER_APP_KEY')
+        raise ScrappyException('No Pushover user key given. Set PUSH_USER_KEY in the config file.')
+    app_key = app.config.get('PUSH_APP_KEY')
     if not app_key:
-        raise ScrappyException('No Pushover application key given. Set PUSHOVER_APP_KEY in the config file.')
+        raise ScrappyException('No Pushover application key given. Set PUSH_APP_KEY in the config file.')
 
     # Assemble the request data
     notification = '{0} is at {1}'.format(client_name, client_ip)
     post_attribs = dict(token=app_key,
                         user=user_key,
-                        priority=app.config.get('PUSHOVER_MSG_PRIORITY', 0),
+                        priority=app.config.get('PUSH_MSG_PRIORITY', 0),
                         title='IP address update',
                         message=notification)
     post_data = urllib.parse.urlencode(post_attribs).encode('utf-8')
@@ -121,7 +121,7 @@ def load_tokens(token_list_filename):
 def hello(token):
     """Check to see if token matches a known one and if client IP has changed, push a notification."""
     try:
-        token_list_filename = app.config.get('TOKEN_LIST_FILE', 'token.list')
+        token_list_filename = app.config.get('TOKEN_FILE', 'token.list')
         token_names = load_tokens(token_list_filename)
         if token in token_names:
             # The URL contains a recognized token. IP address comes from a parameter (if given) or the source IP.
@@ -177,9 +177,28 @@ def init_logging():
     app.logger.addHandler(log_handler)
 
 
+def init_config():
+    """Initialize app configuration.
+
+    We source configuration variables from three locations. In order of priority:
+      1. Environment variables of the form "SCRAPPY_x" where "x" is the variable name.
+      2. Configuration file pointed to by the "SCRAPPYDDNS_CONF" environment variable.
+      3. The "scrappyddns.conf" file in the current directory.
+    """
+    app.config.from_pyfile('scrappyddns.conf', silent=True)
+    app.config.from_envvar('SCRAPPYDDNS_CONF', silent=True)
+
+    class ScrappyConf(object):
+        def __init__(self, source_dict):
+            source_vars = {key: value for (key, value) in source_dict.items() if key.startswith('SCRAPPY_')}
+            for key, value in source_vars.items():
+                setattr(self, key.replace('SCRAPPY_', '', 1), value)
+    scrappy_conf = ScrappyConf(os.environ)
+    app.config.from_object(scrappy_conf)
+
+
 # Initialize the Flask app instance.
-app.config.from_pyfile('scrappyddns.conf', silent=True)
-app.config.from_envvar('SCRAPPYDDNS_CONF', silent=True)
+init_config()
 init_logging()
 
 # Start embedded server if run as a script.

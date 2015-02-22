@@ -13,9 +13,7 @@ import ssl
 
 # Create app. Look for config file in module dir or dir in environment variable.
 app = Flask(__name__)
-app.config.from_pyfile('scrappyddns.conf')
-if os.environ.get('SCRAPPYDDNS_CONF'):
-    app.config.from_envvar('SCRAPPYDDNS_CONF')
+
 
 class ScrappyException(Exception):
     """Represents a service failure."""
@@ -178,7 +176,10 @@ def init_logging():
     app.logger.setLevel(log_level)
     app.logger.addHandler(log_handler)
 
-# Always initialize logging.
+
+# Initialize the Flask app instance.
+app.config.from_pyfile('scrappyddns.conf', silent=True)
+app.config.from_envvar('SCRAPPYDDNS_CONF', silent=True)
 init_logging()
 
 # Start embedded server if run as a script.

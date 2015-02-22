@@ -82,7 +82,9 @@ The recommended way to run a standalone instance of Scrappy is as a [Docker](htt
 
 ## Option 3: Deploy to an existing web server
 
-Scrappy DDNS is a Flask web application that can be deployed to any WSGI-compliant container with Python 3 support including Apache, nginx, Gunicorn, Tornado, and others. You must have the **Flask** library installed and **Python 3.4 or higher** to run it. The Flask project's [deployment documentation](http://flask.pocoo.org/docs/0.10/deploying/) explains how to deploy to a number of these servers. If you have an existing web server and you're the DIY type, this might be a good option for you. Just make sure your server supports SSL/TLS to protect tokens in transit if it is exposed on the Internet.
+Scrappy DDNS is a Flask web application that can be deployed to any WSGI-compliant container with Python 3 support including Apache (mod_wsgi), nginx (uWSGI), Waitress, Gunicorn, and others. You must have the **Flask** library installed and **Python 3.4 or higher** to run it. The Flask project's [deployment documentation](http://flask.pocoo.org/docs/0.10/deploying/) explains how to deploy to a number of these servers. If you have an existing web server and you're the DIY type, this might be a good option for you. Just make sure your server supports SSL/TLS to protect tokens in transit if it is exposed on the Internet.
+
+By setting the environment variable `SCRAPPYDDNS_CONF`, you can specify the path and filename of the `scrappyddns.conf` file that holds all of the Scrappy DDNS configuration including the locations of the token list, logs, and cache directory.
 
 # Client configuration
 

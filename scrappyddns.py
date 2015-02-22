@@ -17,7 +17,6 @@ app.config.from_pyfile('scrappyddns.conf')
 if os.environ.get('SCRAPPYDDNS_CONF'):
     app.config.from_envvar('SCRAPPYDDNS_CONF')
 
-
 class ScrappyException(Exception):
     """Represents a service failure."""
     def __init__(self, value):
@@ -179,10 +178,11 @@ def init_logging():
     app.logger.setLevel(log_level)
     app.logger.addHandler(log_handler)
 
+# Always initialize logging.
+init_logging()
 
+# Start embedded server if run as a script.
 if __name__ == "__main__":
-    init_logging()
-
     # And GO!
     host = sys.argv[1] if len(sys.argv) > 1 else '0.0.0.0'
     port = int(sys.argv[2]) if len(sys.argv) > 2 else 5000

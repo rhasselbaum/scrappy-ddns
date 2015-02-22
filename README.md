@@ -1,5 +1,5 @@
 # Scrappy DDNS
-Scrappy DDNS is Dynamic DNS-like service that sends push notifications to your mobile devices whenever your public IP address changes. It works in conjunction with DDNS clients built into many routers/firewalls such as [DD-WRT](http://www.dd-wrt.com/site/index) and [pfSense](https://www.pfsense.org/). But really, any client capable of making an HTTP request can work -- even a cron job that calls `curl` periodically will do in a pinch. Push notifications are sent via the awesome [Pushover](https://pushover.net/) service, which supports Android, iOS, and desktop systems.
+Scrappy DDNS is a Dynamic DNS-like service that sends push notifications to your mobile devices whenever your public IP address changes. It works in conjunction with DDNS clients built into many routers/firewalls such as [DD-WRT](http://www.dd-wrt.com/site/index) and [pfSense](https://www.pfsense.org/). But really, any client capable of making an HTTP request can work -- even a cron job that calls `curl` periodically will do in a pinch. Push notifications are sent via the awesome [Pushover](https://pushover.net/) service, which supports Android, iOS, and desktop systems.
 
 # Why Scrappy?
 So what good is a DDNS service that doesn't actually update DNS records? Scrappy might be right for you if:

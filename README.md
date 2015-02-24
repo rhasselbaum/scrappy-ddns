@@ -15,13 +15,15 @@ Scrappy DDNS is a simple Python web service. It listens for HTTP GET requests wi
 ```
 https://scrappy.example.com/NRmP324IsdSo2xidk69imtR2
 ```
-When the service gets a request with a valid token, it compares the source IP address to the last known address for the same token. If there is a change, it sends an alert.
+When the service gets a request with a valid token, it compares the IP address of the client to the last known address for the same token. If there is a change, it sends an alert.
 
 Alternatively, the public IP address can be given as a URL parameter:
 ```
 https://scrappy.example.com/NRmP324IsdSo2xidk69imtR2?ip_address=1.2.3.4
 ```
-This is necessary if the source IP address of the HTTP request is not the same as the public IP such as when Scrappy is installed behind the firewall. Naturally, this requires the client to [know](http://tecadmin.net/5-commands-to-get-public-ip-using-linux-terminal/) its public IP address. :-)
+This is necessary if the client's public IP address can't be determined from the HTTP request's source IP address or `X-Forwarded-For` header such as when the client and server both reside on the same private network. Naturally, this requires the client to [know](http://tecadmin.net/5-commands-to-get-public-ip-using-linux-terminal/) its public IP address. :-)
+
+The server returns a `200` response and the word `OK` in the response body if there were no errors. A `404` response indicates an unknown token and a `500` response indicates some form of server error such as a failed request to the Pushover service. There is no automatic retry for failed Pushover requests, but many DDNS clients will interpret the `500 `status code as a signal to try again later.
 
 # Getting started
 Before you begin, download the [Pushover](https://pushover.net) app and register on their web site to obtain a user key and an [application key](https://pushover.net/apps/clone/Scrappy_DDNS) for your copy of Scrappy DDNS. The service has a free trial period and no recurring fees after purchase of an app license.
@@ -78,13 +80,15 @@ The script can be started from an init system such as systemd to run as a persis
 
 ## Option 2: Run inside a Docker container
 
-The recommended way to run a standalone instance of Scrappy is as a [Docker](https://www.docker.com) container. The [rhasselbaum/scrappy-ddns](https://registry.hub.docker.com/u/rhasselbaum/scrappy-ddns) images on the Docker Hub run Scrappy DDNS under the Gunicorn container with SSL/TLS support for encrypted connections. For more information, visit my [repository](https://registry.hub.docker.com/u/rhasselbaum/scrappy-ddns) or the related [GitHub project](https://github.com/rhasselbaum/docker-scrappy-ddns) that contains the automated build files and instructions.
+The recommended way to run a standalone instance of Scrappy is as a [Docker](https://www.docker.com) container. The [rhasselbaum/scrappy-ddns](https://registry.hub.docker.com/u/rhasselbaum/scrappy-ddns) images on the Docker Hub run Scrappy DDNS using the Waitress WSGI container and nginx for SSL/TLS encrypted connectionss. For more information, visit my [repository](https://registry.hub.docker.com/u/rhasselbaum/scrappy-ddns) or the related [GitHub project](https://github.com/rhasselbaum/docker-scrappy-ddns) that contains the automated build files and instructions.
 
 ## Option 3: Deploy to an existing web server
 
 Scrappy DDNS is a Flask web application that can be deployed to any WSGI-compliant container with Python 3 support including Apache (mod_wsgi), nginx (uWSGI), Waitress, Gunicorn, and others. You must have the **Flask** library installed and **Python 3.4 or higher** to run it. The Flask project's [deployment documentation](http://flask.pocoo.org/docs/0.10/deploying/) explains how to deploy to a number of these servers. If you have an existing web server and you're the DIY type, this might be a good option for you. Just make sure your server supports SSL/TLS to protect tokens in transit if it is exposed on the Internet.
 
 By setting the environment variable `SCRAPPYDDNS_CONF`, you can specify the path and filename of the `scrappyddns.conf` file that holds all of the Scrappy DDNS configuration including the locations of the token list, logs, and cache directory.
+
+If you run the WSGI container behind a reverse proxy such as nginx, you might see Scrappy DDNS incorrectly report the proxy server's IP address (e.g `127.0.0.1`) instead of the cliens' public IP addresses. That's because most proxy servers hide the source IP of their clients' TCP connections. To fix this, you can either have the DDNS clients pass their public IP address in the `ip_address` URL parameter or set the `PROXY_COUNT` parameter in the `scrappyddns.conf` file to a positive numbe (usually 1). The `PROXY_COUNT` setting tells Scrappy to look for the client IP in the `X-Forwarded-For` HTTP header that many proxy servers support for this purpose. If you go this route, make sure you have configured your proxy to set this header. (Here is an [nginx example](https://github.com/rhasselbaum/docker-scrappy-ddns/blob/master/scrappyddns-site).) For more details, read the `PROXY_COUNT` comments in the `scappyddns.conf` file. 
 
 # Client configuration
 

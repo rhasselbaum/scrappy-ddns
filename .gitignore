@@ -1,3 +1,4 @@
 .idea
 *.ip
 __pycache__
+config

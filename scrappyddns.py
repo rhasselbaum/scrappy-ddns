@@ -2,7 +2,6 @@ import logging.handlers
 import os
 from flask import Flask, abort, request
 import time
-import re
 import sys
 import urllib.parse
 import json
@@ -10,6 +9,7 @@ import traceback
 import tempfile
 import http.client
 import ssl
+import re
 
 # Create app. Look for config file in module dir or dir in environment variable.
 app = Flask(__name__)
@@ -117,6 +117,34 @@ def load_tokens(token_list_filename):
     return token_names
 
 
+def find_client_ip():
+    """Determine the client's IP address from the request metadata and return it.
+
+    If PROXY_COUNT > 0 and the request contains a "X-Forwarded-For" header, we count down from the
+    rightmost entry in the header to find the client's IP address. Otherwise, we use the remote address
+    from the request.
+
+    A warning is issued if PROXY_COUNT > 0 but the "X-Forwarded-For" header doesn't contain the
+    expected number of nodes.
+    """
+    client_ip = request.remote_addr
+    proxy_count = int(app.config.get('PROXY_COUNT', 0))
+    if proxy_count > 0:
+        # Create list of IP addresses in reverse order from "X-Forwarded-For" header.
+        req_hops = [hop for hop in re.split(r'[\s,]*', request.headers.get('X-Forwarded-For', '')) if hop][::-1]
+        if req_hops:
+            if len(req_hops) >= proxy_count:
+                # Client IP is the nth hop element, where n is the proxy count.
+                client_ip = req_hops[proxy_count-1:proxy_count][0]
+            else:
+                app.logger.warn('X-Forwarded-For header has %s node(s) but the expected number of proxies is %s. '
+                                'This is a misconfiguration.', len(req_hops), proxy_count)
+        else:
+            app.logger.warn('X-Forwarded-For header contains no data but the expected number of proxies is %s. '
+                            'This is a misconfiguration.', proxy_count)
+    return client_ip
+
+
 @app.route("/<token>")
 def hello(token):
     """Check to see if token matches a known one and if client IP has changed, push a notification."""
@@ -126,7 +154,7 @@ def hello(token):
         if token in token_names:
             # The URL contains a recognized token. IP address comes from a parameter (if given) or the source IP.
             client_name = token_names[token]
-            client_ip = request.args.get('ip_address', request.remote_addr)
+            client_ip = request.args.get('ip_address', find_client_ip())
             app.logger.debug('Received ping from [%s] @ %s.', client_name, client_ip)
             # Old IP address, if known, is contained in a "<token>.ip" file in the cache directory.
             cache_dir = app.config.get('IP_ADDRESS_CACHE', '.')

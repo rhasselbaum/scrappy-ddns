@@ -47,7 +47,7 @@ The Git repo has a sample `token.list` file that you can use as a template.
 There are several ways to get the Scrappy DDNS up and running. From simple to complex, you can:
 
 1. Run the Python script directly.
-2. Run it inside a [Docker container](https://github.com/rhasselbaum/docker-scrappy-ddns).
+2. Run it inside a [Docker container](https://hub.docker.com/r/rhasselbaum/scrappy-ddns/).
 3. Deploy it to an existing web server.
 
 We'll cover each option below.
@@ -80,7 +80,7 @@ The script can be started from an init system such as systemd to run as a persis
 
 ## Option 2: Run inside a Docker container
 
-The recommended way to run a standalone instance of Scrappy is as a [Docker](https://www.docker.com) container. The [rhasselbaum/scrappy-ddns](https://registry.hub.docker.com/u/rhasselbaum/scrappy-ddns) images on the Docker Hub run Scrappy DDNS using the Waitress WSGI container and nginx for SSL/TLS encrypted connectionss. For more information, visit my [repository](https://registry.hub.docker.com/u/rhasselbaum/scrappy-ddns) or the related [GitHub project](https://github.com/rhasselbaum/docker-scrappy-ddns) that contains the automated build files and instructions.
+The recommended way to run a standalone instance of Scrappy is as a [Docker](https://www.docker.com) container. The [rhasselbaum/scrappy-ddns](https://hub.docker.com/r/rhasselbaum/scrappy-ddns/) images on the Docker Hub run Scrappy DDNS using the Waitress WSGI container and nginx for SSL/TLS encrypted connectionss. For more information, visit my [repository](https://registry.hub.docker.com/u/rhasselbaum/scrappy-ddns) or the related [GitHub project](https://github.com/rhasselbaum/docker-scrappy-ddns) that contains the automated build files and instructions.
 
 ## Option 3: Deploy to an existing web server
 
